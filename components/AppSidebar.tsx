@@ -13,13 +13,13 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarSeparator,
+  useSidebar,
 } from "./ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,11 +29,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
 import { sidebarSections } from "./sidebarItems";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
@@ -41,6 +36,8 @@ import { usePathname } from "next/navigation";
 const AppSidebar = () => {
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const toggleItem = (title: string) => {
     setOpenItems(prev => ({
@@ -57,7 +54,21 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="hover:bg-transparent">
               <Link href="/" className="flex items-center cursor-pointer justify-center">
-                <Image src="/white-logo.png" alt="Nawiri Logo" width={100} height={100} />
+                {isCollapsed ? (
+                  <Image 
+                    src="/icon-logo.png" 
+                    alt="Nawiri Icon" 
+                    width={40} 
+                    height={40} 
+                  />
+                ) : (
+                  <Image 
+                    src="/white-logo.png" 
+                    alt="Nawiri Logo" 
+                    width={100} 
+                    height={100} 
+                  />
+                )}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -67,11 +78,14 @@ const AppSidebar = () => {
 
       {/* ---------- CONTENT ---------- */}
       <SidebarContent className="bg-[#1a1f37] scrollbar-hide overflow-y-auto">
-        {sidebarSections.map((section) => (
-          <SidebarGroup key={section.label} className="px-3 py-2">
-            <SidebarGroupLabel className="text-xs font-semibold uppercase text-cyan-400 mb-2 px-2">
-              {section.label}
-            </SidebarGroupLabel>
+        {sidebarSections.map((section, idx) => (
+          <SidebarGroup key={section.label || `section-${idx}`} className="px-3 py-2">
+            {/* Only show label if it exists */}
+            {section.label && (
+              <SidebarGroupLabel className="text-xs font-semibold uppercase text-cyan-400 mb-2 px-2">
+                {section.label}
+              </SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
@@ -110,7 +124,8 @@ const AppSidebar = () => {
                             </div>
                           </SidebarMenuButton>
 
-                          {isOpen && item.children && (
+                          {/* Show children when expanded OR when parent/child is active */}
+                          {(isOpen || hasActiveChild) && item.children && (
                             <SidebarMenuSub className="ml-0 mt-1 border-l-2 border-[#7c3aed] pl-4">
                               {item.children.map((sub) => {
                                 const isSubActive = pathname === sub.url;
