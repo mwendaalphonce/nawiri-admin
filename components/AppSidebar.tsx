@@ -56,7 +56,7 @@ const AppSidebar = () => {
               <Link href="/" className="flex items-center cursor-pointer justify-center">
                 {isCollapsed ? (
                   <Image 
-                    src="/icon-logo.png" 
+                    src="/logo.png" 
                     alt="Nawiri Icon" 
                     width={40} 
                     height={40} 
